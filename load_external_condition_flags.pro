@@ -129,16 +129,19 @@ END
 ; Written on 05/10/2021
 ;------------------------------------------------------
 FUNCTION load_region_flag, data, region
+   r = sqrt(data.GSE_X^2 + data.GSE_Y^2)
 
   CASE region OF
      'all'      : flag_region = data.region LT 10
      'Lobe'     : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region EQ 1)
-     'BL'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region EQ 2)
-     'PS'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region EQ 3)
+   ;   'BL'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region EQ 2)
+   ;   'PS'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region EQ 3)
+     'BL'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region LE 3 ) and ( ((r gt 15) and (data.beta le 1 and data.beta gt 0.05) ) or ((r le 15) and (data.beta le exp(0.14*r-2.1))) and data.beta gt 0.05)
+     'PS'       : flag_region = (data.mlt GT 16 OR data.mlt LT 8) AND (data.region LE 3 ) and ( ((r gt 15) and (data.beta gt 1) ) or ((r le 15) and (data.beta gt exp(0.14*r-2.1))) and data.beta gt 0.05)
      'Dayside'  : flag_region = (data.mlt GE 8) and (data.mlt LE 16) AND data.region LT 10    
      'Tail'     : flag_region = (data.mlt GT 16) OR (data.mlt LT 8) AND data.region LT 10
   ENDCASE
-  
+ 
   flag_region = FLOAT(flag_region)
 
   index = where(flag_region EQ 0, ct)
@@ -157,6 +160,7 @@ PRO load_external_condition_flags, data, storm_phase, substorm_phase, region, fl
 
   flag_storm = load_storm_phase_flag(data, storm_phase)
   flag_substorm = load_substorm_phase_flag(data, substorm_phase)
+  stop
   flag_region = load_region_flag(data, region)
   
   flag_ext_condition = flag_storm * flag_substorm *  flag_region
