@@ -1,4 +1,4 @@
-PRO average_data_y, data, tag, average_time,time_avg, y_avg=y_avg, yfound=yfound
+PRO average_data_y, data, tag, average_time,time_avg, y_avg=y_avg, yfound=yfound, sumup = sumup
   n_avg = N_ELEMENTS(time_avg)
   
   str_element, data, tag, value, SUCCESS=yfound
@@ -7,30 +7,30 @@ PRO average_data_y, data, tag, average_time,time_avg, y_avg=y_avg, yfound=yfound
   data_y = value
   
   index = where(data_y LE -9e10,ct)
-  IF ct GT 0 THEN data_y(index) = !VALUES.F_NAN 
+  IF ct GT 0 THEN data_y[index] = !VALUES.F_NAN 
 
   size_y = SIZE(data_y)  
-  dim_y = size_y(0)
+  dim_y = size_y[0]
   IF dim_y GT 3 THEN RETURN
-  IF dim_y EQ 3 THEN y_avg = DBLARR(n_avg, size_y(2), size_y(3))
-  IF dim_y EQ 2 THEN y_avg = DBLARR(n_avg, size_y(2)) 
+  IF dim_y EQ 3 THEN y_avg = DBLARR(n_avg, size_y[2], size_y[3])
+  IF dim_y EQ 2 THEN y_avg = DBLARR(n_avg, size_y[2]) 
   IF dim_y EQ 1 THEN y_avg = DBLARR(n_avg)
   
   if dim_y eq 0 then y_avg = DBLARR(n_avg)
   
 ; calculate mean of the data for time points
   FOR itime = 0l, n_avg-1 DO BEGIN
-     IF dim_y EQ 3 THEN index = where(data.x GE time_avg(itime)-average_time/2 AND data.x LT time_avg(itime)+average_time/2 AND TOTAL(TOTAL(data_y,2,/NAN),2,/NAN) NE 0, ct)
-     IF dim_y EQ 2 THEN index = where(data.x GE time_avg(itime)-average_time/2 AND data.x LT time_avg(itime)+average_time/2 AND TOTAL(data_y,2,/NAN) NE 0, ct)
-     IF dim_y EQ 1 THEN index = where(data.x GE time_avg(itime)-average_time/2 AND data.x LT time_avg(itime)+average_time/2 AND TOTAL(data_y, /NAN) NE 0, ct)
+     IF dim_y EQ 3 THEN index = where(data.x GE time_avg[itime]-average_time/2 AND data.x LT time_avg[itime]+average_time/2 AND TOTAL(TOTAL(data_y,2,/NAN),2,/NAN) NE 0, ct)
+     IF dim_y EQ 2 THEN index = where(data.x GE time_avg[itime]-average_time/2 AND data.x LT time_avg[itime]+average_time/2 AND TOTAL(data_y,2,/NAN) NE 0, ct)
+     IF dim_y EQ 1 THEN index = where(data.x GE time_avg[itime]-average_time/2 AND data.x LT time_avg[itime]+average_time/2 AND TOTAL(data_y, /NAN) NE 0, ct)
      
-     IF ct GT 0 AND TOTAL(ABS(data_y(index, *)) GE 0,/NAN) GT 0  THEN BEGIN
-        IF KEYWORD_SET(sum_up) THEN  BEGIN
-           y_avg(itime, *) = TOTAL(data_y(index, *),1, /NAN)
+     IF ct GT 0 AND TOTAL(ABS(data_y[index, *]) GE 0,/NAN) GT 0  THEN BEGIN
+        IF KEYWORD_SET(sumup) THEN  BEGIN
+           y_avg[itime, *] = TOTAL(data_y[index, *],1, /NAN)
         ENDIF  ELSE BEGIN
-           y_avg(itime, *) = TOTAL(data_y(index, *), 1, /NAN)/TOTAL(FINITE(data_y(index, *)),1)
+           y_avg[itime, *] = TOTAL(data_y[index, *], 1, /NAN)/TOTAL(FINITE(data_y[index, *]),1)
         ENDELSE
-     ENDIF ELSE y_avg(itime, *) = !VALUES.F_NAN
+     ENDIF ELSE y_avg[itime, *] = !VALUES.F_NAN
   ENDFOR
 ;stop
 END   
@@ -75,21 +75,21 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
   tplot_names, var, NAMES=var_names
   
   IF NOT KEYWORD_SET(var_names) THEN RETURN
-  IF var_names(0) EQ '' THEN RETURN
+  IF var_names[0] EQ '' THEN RETURN
   new_var_names = strarr(N_ELEMENTS(var_names))
 ;--------------------------------------------------------------------
 ; Loop through all variables
 ;--------------------------------------------------------------------
   FOR iv = 0, n_elements(var_names)-1 DO BEGIN
-     IF strpos(var_names(iv), '_AVG') NE -1 THEN RETURN
+     IF strpos(var_names[iv], '_AVG') NE -1 THEN RETURN
 
 ;------------------------------------------------------------------
 ; Extract data information from tplot variable
 ;------------------------------------------------------------------
      
-     time_trim_tplot_variable, var_names(iv), min(time_avg)-average_time/2, max(time_avg)+average_time/2,keep_v=keep_v
+     time_trim_tplot_variable, var_names[iv], min(time_avg)-average_time/2, max(time_avg)+average_time/2,keep_v=keep_v
 
-     get_data, var_names(iv), data=data, dlim=dlim, lim=lim
+     get_data, var_names[iv], data=data, dlim=dlim, lim=lim
 
      average_data_y,data,'Y', average_time, time_avg, y_avg = y_avg, yfound = yfound
      
@@ -98,19 +98,19 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
         RETURN
      ENDIF
      
-     average_data_y, data,'V', average_time, time_avg, y_avg=v_avg, yfound = vfound 
+     average_data_y, data,'V', average_time, time_avg, y_avg=v_avg, yfound = vfound , sumup = sumup
      if keyword_set(keep_v) then v_avg = data.v
      
-     average_data_y, data,'dy', average_time, time_avg,y_avg=dy_avg, yfound = dyfound
+     average_data_y, data,'dy', average_time, time_avg,y_avg=dy_avg, yfound = dyfound, sumup = sumup
 
 ;------------------------------------------------------------------
 ; If keyword NEW_NAME is set the time averaged variable is stored
 ; with a new name that includes the averaging time
 ;------------------------------------------------------------------
      IF KEYWORD_SET(NEW_NAME) THEN BEGIN
-        new_var_name = var_names(iv) + '_AVG' + at_str
+        new_var_name = var_names[iv] + '_AVG' + at_str
      ENDIF ELSE BEGIN
-        new_var_name = var_names(iv)
+        new_var_name = var_names[iv]
      ENDELSE
  
 ;     datastr = data
@@ -137,22 +137,22 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
  
      store_data, new_var_name, data=datastr, dlim=dlim, lim=lim
 
-     new_var_names(iv) = new_var_name
+     new_var_names[iv] = new_var_name
 ;------------------------------------------------------------------
 ; Set plot attributes for new variable names
 ;------------------------------------------------------------------
      IF KEYWORD_SET(NEW_NAME) THEN BEGIN
-        IF strpos(var_names(iv), '_SP') NE -1 THEN BEGIN
-           specie = strmid(var_names(iv), strpos(var_names(iv), '_SP') + 3, 1)
+        IF strpos(var_names[iv], '_SP') NE -1 THEN BEGIN
+           specie = strmid(var_names[iv], strpos(var_names[iv], '_SP') + 3, 1)
         ENDIF
-        sat = strmid(var_names(iv), strpos(var_names(iv), '_SC') + 3, 1)
+        sat = strmid(var_names[iv], strpos(var_names[iv], '_SC') + 3, 1)
         
         specie_str = ['H!U+!N','He!U++!N','He!U+!N','O!U+!N']
         
-        IF strpos(var_names(iv), '_UN') NE -1 THEN BEGIN
-           dumstr = strmid(var_names(iv), $
-                           strpos(var_names(iv), '_UN')+3,$
-                           strlen(var_names(iv))-1)
+        IF strpos(var_names[iv], '_UN') NE -1 THEN BEGIN
+           dumstr = strmid(var_names[iv], $
+                           strpos(var_names[iv], '_UN')+3,$
+                           strlen(var_names[iv])-1)
            units_name = strmid(dumstr, 0, strpos(dumstr, '_'))
            CASE STRUPCASE(units_name) OF
               'COUNTS': uname = 'COUNTS'
@@ -167,7 +167,7 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
            
         ENDIF
         
-        IF STRMID(var_names(iv),0,6) EQ 'ENSPEC' THEN BEGIN
+        IF STRMID(var_names[iv],0,6) EQ 'ENSPEC' THEN BEGIN
            options, new_var_name, 'spec',1
            options, new_var_name, 'x_no_interp',1
            options, new_var_name, 'y_no_interp',1
@@ -176,7 +176,7 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
            ylim,    new_var_name,  20., 4.5e4, 1
         ENDIF
         
-        IF STRMID(var_names(iv),0,6) EQ 'PASPEC' THEN BEGIN
+        IF STRMID(var_names[iv],0,6) EQ 'PASPEC' THEN BEGIN
            options, new_var_name, 'spec',1
            options, new_var_name, 'x_no_interp',1
            options, new_var_name, 'y_no_interp',1
@@ -185,7 +185,7 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
            ylim,    new_var_name,  0., 360., 0
         ENDIF
         
-        IF STRMID(var_names(iv),0,3) EQ 'MAG' THEN BEGIN
+        IF STRMID(var_names[iv],0,3) EQ 'MAG' THEN BEGIN
            ylim,    new_var_name,  0., 0., 0
         ENDIF
         

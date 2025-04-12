@@ -1,5 +1,4 @@
-PRO filter_spectra_with_regions, spectra_tplot_name, filter_tplot_name
-
+pro filter_spectra_with_regions, spectra_tplot_name, filter_tplot_name
   get_data, spectra_tplot_name, data = data
   time_avg = data.x
   y_avg = data.y
@@ -9,11 +8,16 @@ PRO filter_spectra_with_regions, spectra_tplot_name, filter_tplot_name
   time_avg = data.x
   filter_avg = data.y
 
-  FOR idim = 0, N_ELEMENTS(y_avg(0,*))-1 DO BEGIN
-     y_avg(*,idim) = y_avg(*,idim) * (filter_avg LE 3.)
-  ENDFOR 
-  
-  str = {x:time_avg, y:y_avg, v:v_avg}
-  store_data, spectra_tplot_name, data = str
+  for idim = 0, n_elements(y_avg[0, *]) - 1 do begin
+    index_invalid = where(~finite(filter_avg), ct_invalid)
+    if ct_invalid gt 0 then y_avg[index_invalid, idim] = !values.f_nan
 
-END
+    index_outside_magentosphere = where(filter_avg gt 3, ct_outside_magentosphere)
+    if ct_outside_magentosphere gt 0 then y_avg[index_outside_magentosphere, idim] = !values.f_nan
+
+    ; y_avg[*, idim] = y_avg[*, idim] * (filter_avg le 3.)
+  endfor
+
+  str = {x: time_avg, y: y_avg, v: v_avg}
+  store_data, spectra_tplot_name, data = str
+end

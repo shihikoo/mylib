@@ -98,6 +98,11 @@ FUNCTION clean_up_daily_data_matrix_rbsp, data, header, ts, te
   IF ct GT 0 THEN data = data[ *,index_row]
 
 ;-- set all infinite flag value to nan
+index_column = WHERE(header EQ 'Flag', ct)
+index_row = WHERE( ~FINITE(data[index_column,*]), ct)
+IF ct GT 0 THEN data[index_column,index_row] = !VALUES.F_NAN
+
+;-- set all infinite flag value to nan
   index_column = WHERE(header EQ 'Flag_para', ct)
   index_row = WHERE( ~FINITE(data[index_column,*]), ct)
   IF ct GT 0 THEN data[index_column,index_row] = !VALUES.F_NAN

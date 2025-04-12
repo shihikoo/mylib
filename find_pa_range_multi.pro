@@ -82,11 +82,9 @@ end
 ;-------------------------
 ; main function
 ;--------------------------
-pro find_pa_range_multi,  pa_name, pap_beam_name, en_name, pap_range_name, int_flux_name
-;   get_data, en_name, data = data
-;   en_en = data.v
-  
-  get_data, pa_name, data = data, dlim = dlim_pa,lim=lim_pa
+pro find_pa_range_multi,   pa_name, pap_beam_name, en_name, pap_range_name, int_flux_name
+
+get_data, pa_name, data = data, dlim = dlim_pa,lim=lim_pa
   time_pa = data.x
   flux_pa = data.y
   pa_pa = data.v

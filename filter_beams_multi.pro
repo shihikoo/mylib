@@ -36,7 +36,7 @@ PRO filter_beams_multi, pap_name, epcut_name, erange_name, pap_beam_name, epcut_
   energy_range = r_data(erange_name,/Y)
   
   n_time = N_ELEMENTS(time_avg)
-  npa = N_ELEMENTS(pa_pap(0, *))
+  npa = N_ELEMENTS(pa_pap[0, *])
   
   IF ~KEYWORD_SET(diff_en) THEN diff_en = 1   ; accepted energy bin difference 
   IF ~KEYWORD_SET(diff_pa) THEN diff_pa = 1 ; accepted pitch bin difference

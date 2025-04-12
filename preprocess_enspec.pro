@@ -41,18 +41,18 @@ pro preprocess_enspec, sat, specie, flux_name, counts_name,  average_time, time_
   te = EXTRACT_TIME_STRING(time_string(t_e))
   low_count_filename = plot_path + 'low_count_filter/' + 'low_count_filter_' + ts + '_' + te + '.ps'
 
-;-----------------------------------------------------------------
+;---------------------------------------------------------------------------------------------
 ; Validate the energy spectra data for the calculation time period. Keep data between t_s and t_e and save them again in original names  
 ; Validate the energy spectra. If not valid, record the error_message in the log and return
-;-------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------
   validate_enspec_tplot, flux_name, t_s, t_e, average_time,  error_message = error_message
   validate_enspec_tplot, counts_name, t_s, t_e, average_time, error_message = error_message
   
   IF error_message NE ''  THEN RETURN
 
-;--------------------------------------------------------
+;------------------------------------------------------------------------------------
 ; Average the energy spectra flux and counts/eflux
-;--------------------------------------------------------
+;------------------------------------------------------------------------------------
 ; Average the flux data into new name and sumup the counts data into new name
   average_tplot_variable_with_given_time, flux_name, average_time, time_avg          
   average_tplot_variable_with_given_time, counts_name, average_time, time_avg, /sumup 
@@ -63,9 +63,9 @@ pro preprocess_enspec, sat, specie, flux_name, counts_name,  average_time, time_
 ; filter energy spectra with regions.  
   filter_spectra_with_regions, flux_avg_name, magnetosphere_region_name
   filter_spectra_with_regions, counts_avg_name, magnetosphere_region_name
-
+  
 ; Clean up the low counts data in flux data, for energy data in all dirctions
   tplot_names, flux_name+'_Original',names=names
   if names[0] eq '' then filter_enspec, counts_avg_name, flux_avg_name, low_count_line, plot_low_count_filter = plot_low_count_filter, filename = low_count_filename
-  
+
 end

@@ -50,9 +50,9 @@ end
 ;-------------------------------------------------------------
 function new_merge_beam_to_external, external_data, beam_data
   beam_matrix = convert_structure_to_matrix(beam_data, header = tagnames_beam)
-  external_matrix = convert_structure_to_matrix(external_data, header = tagnames_external)
+  ; external_matrix = convert_structure_to_matrix(external_data, header = tagnames_external)
 
-  n_term_external = n_elements(tagnames_external)
+  ; n_term_external = n_elements(tagnames_external)
   n_term_beam = n_elements(tagnames_beam)
 
   index = where(beam_data.flux_para gt 0 or beam_data.flux_anti gt 0, ct)
