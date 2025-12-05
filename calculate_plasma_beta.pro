@@ -31,7 +31,7 @@ end
 ; Created on 03/13/2021
 ; ---------------------------------------------------------------------------------
 
-pro calculate_plasma_beta, h1_pressure_name, o1_pressure_name, mag_pressure_name, o1_density_name, h1_density_name, beta_name, p_total_name, density_ratio_name, error_message = error_message
+pro calculate_plasma_beta, h1_pressure_name, o1_pressure_name, mag_pressure_name, o1_density_name, h1_density_name, beta_name, p_total_name, density_ratio_name,pressure_ratio_name, error_message = error_message
   if ~keyword_set(error_message) then error_message = ''
 
   validate_pressure_tplot, h1_pressure_name, error_message = error_message
@@ -68,4 +68,10 @@ pro calculate_plasma_beta, h1_pressure_name, o1_pressure_name, mag_pressure_name
   store_data, density_ratio_name, data = {x: h1_density_data.x, y: o1_density_data.y / h1_density_data.y}
   options, density_ratio_name, 'ytitle', 'Density Ratio'
   ylim, density_ratio_name, 1e-3, 10., 1
+
+  store_data, pressure_ratio_name, data = {x: h1_pressure_data.x, y: o1_pressure_data.y / h1_pressure_data.y}
+  options, pressure_ratio_name, 'ytitle', 'Pressure Ratio'
+  ylim, pressure_ratio_name, 1e-3, 10., 1
+
+; stop
 end

@@ -91,8 +91,8 @@ function load_storm_phase_flag, data, storm_phase_name
   if storm_phase_name eq 'prestorm' then storm_phase = 5
 
   for i = 0, n_elements(storm_phase) - 1 do begin
-    if i eq 0 then flag_phase = data.storm_phase eq storm_phase(i) $
-    else flag_phase = (flag_phase + (data.storm_phase eq storm_phase(i))) gt 0
+    if i eq 0 then flag_phase = data.storm_phase eq storm_phase[i] $
+    else flag_phase = (flag_phase + (data.storm_phase eq storm_phase[i])) gt 0
   endfor
 
   ; set all infinite flag value to nan
@@ -107,18 +107,22 @@ end
 ; Purpose: load substorm phase flag with input substorm phase name
 ; Inputs:  data, substorm_phase_name
 ; Written by Jing Liao
-; Written on 05/10/2021
+; Written on 11/11/2025
 ; -----------------------------------------------------------------
 function load_substorm_phase_flag, data, substorm_phase_name
-  if substorm_phase_name eq 'storm_time' then substorm_phase = [1]
-  if substorm_phase_name eq 'nonstorm_time' then substorm_phase = [0]
-  if substorm_phase_name eq 'all' then substorm_phase = [0, 1]
+  flag_phase = fltarr(n_elements(data.time)) * !VALUES.F_NAN
 
-  ; flag_phase = FLOAT(flag_phase)
-  ; index = WHERE(flag_phase EQ 0, ct)
-  ; IF ct GT 0 THEN flag_phase(index) = !VALUES.F_NAN
-  flag_phase = data.time
-  flag_phase[*] = 1
+  if substorm_phase_name eq 'all' then flag_phase[*] = 1
+
+  if substorm_phase_name eq 'substorm' then begin 
+    index = where(finte(data.substormphase), ct) 
+    if ct gt 0 then flag_phase[index] = 1
+  endif 
+  if substorm_phase_name eq 'quiet' then begin
+    index = where(~finte(data.substormphase), ct) 
+    if ct gt 0 then flag_phase[index] = 1
+  endif  
+  
   RETURN, flag_phase
 end
 

@@ -1,4 +1,19 @@
 ; --------------------------------------------------------------------------
+; Purpose: write data into csv in x and y axis
+; Inputs:  fln_data, x_axis, y_axis, data
+; --------------------------------------------------------------------------
+; 
+pro write_map_csv, fln_data, x_axis, y_axis, data
+    data_csv = [reform(y_axis, 1, n_elements(y_axis)), data]
+
+    header = strarr(n_elements(x_axis) + 1)
+
+    for i = 0, n_elements(x_axis) - 1 do header[i + 1] = string(x_axis[i])
+
+    write_csv, fln_data, data_csv, header = header
+end
+
+; --------------------------------------------------------------------------
 ; Purpose: calculate sample counts, event counts and event ratio for map
 ; Inputs: x_range, y_range, z_range, grid_x, grid_y, grid_z, total_counts,event_counts,event_ratio1
 ; --------------------------------------------------------------------------
@@ -26,7 +41,7 @@ pro calculate_ratio_for_map, data_pos, x_range, y_range, z_range, x_log, y_log, 
     y_axis = indgen(ny) * grid_y + (y_range[0] < y_range[1]) + grid_y * 0.5
     y_cuttings = [[y_axis - 0.5 * grid_y], [y_axis + 0.5 * grid_y]]
   endelse
-
+  
   if keyword_set(slice_mlt) then begin
     z_axis = [0, 4, 8, 12, 16, 20]
     z_cuttings = [[22, 2, 6, 10, 14, 18], [2, 6, 10, 14, 18, 22]]
@@ -81,7 +96,7 @@ end
 ; , samples_v_log, samples_v_range,samples_unit, ratio_v_log, ratio_v_range, ratio_unit
 ;
 ; ---------------------------------------------------------------------------------------------------------
-pro make_2d_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, x_range, y_range, xlog, ylog, filename, events_v_log, events_v_range, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_v_log, ratio_v_range, ratio_unit, ps_plot = ps_plot, threshold = threshold, region = region, ratio_correction = ratio_correction
+pro make_2d_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, x_range, y_range, xlog, ylog, filename, events_v_log, events_v_range, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_v_log, ratio_v_range, ratio_unit, ps_plot = ps_plot, threshold = threshold, region = region, ratio_correction = ratio_correction,remove_ps = remove_ps
   ; --- filepath ----
   path_2d = filepath + '2d/'
 
@@ -112,28 +127,28 @@ pro make_2d_heat_map, total_counts, event_counts, event_ratio, filepath, ext_con
   filename = path_2d + ext_condition_str + '_' + int_condition_str + '_samples_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '.ps'
   title = ext_condition_str + '!C' + int_condition_str + ' Samples!Cfrom ' + ts_date + ' to ' + te_date
 
-  make_heat_map, x_axis, y_axis, total_counts_2d, filename, title, plot_axis, unit = samples_unit, xrange = x_range, yrange = y_range, zrange = samples_v_range, xlog = xlog, ylog = ylog, zlog = samples_v_log, ps_plot = ps_plot
+  make_heat_map, x_axis, y_axis, total_counts_2d, filename, title, plot_axis, unit = samples_unit, xrange = x_range, yrange = y_range, zrange = samples_v_range, xlog = xlog, ylog = ylog, zlog = samples_v_log, ps_plot = ps_plot,remove_ps = remove_ps
 
   ; -- draw heat map for events
   filename = path_2d + ext_condition_str + '_' + int_condition_str + '_events_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '.ps'
   title = ext_condition_str + '!C' + int_condition_str + ' Events!Cfrom ' + ts_date + ' to ' + te_date
 
-  make_heat_map, x_axis, y_axis, event_counts_2d, filename, title, plot_axis, unit = events_unit, xrange = x_range, yrange = y_range, zrange = events_v_range, xlog = xlog, ylog = ylog, zlog = events_v_log, ps_plot = ps_plot
+  make_heat_map, x_axis, y_axis, event_counts_2d, filename, title, plot_axis, unit = events_unit, xrange = x_range, yrange = y_range, zrange = events_v_range, xlog = xlog, ylog = ylog, zlog = events_v_log, ps_plot = ps_plot,remove_ps = remove_ps
 
   ; -- draw heat map for event ratio
   filename = path_2d + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '.ps'
   title = ext_condition_str + '!C' + int_condition_str + ' Ratio!Cfrom ' + ts_date + ' to ' + te_date
 
-  make_heat_map, x_axis, y_axis, event_ratio_2d, filename, title, plot_axis, unit = ratio_unit, xrange = x_range, yrange = y_range, zrange = ratio_v_range, xlog = xlog, ylog = ylog, zlog = ratio_v_log, ps_plot = ps_plot
+  make_heat_map, x_axis, y_axis, event_ratio_2d, filename, title, plot_axis, unit = ratio_unit, xrange = x_range, yrange = y_range, zrange = ratio_v_range, xlog = xlog, ylog = ylog, zlog = ratio_v_log, ps_plot = ps_plot,remove_ps = remove_ps
 
-  ; write ratio into a csv file temp
-  ; fln_data = path_2d + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '.csv'
-  ; data_csv = [reform(y_axis, 1, n_elements(y_axis)), event_ratio_2d]
+  ; write ratio into a csv file
+  fln_data = path_2d + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '.csv'
+  data_csv = [reform(y_axis, 1, n_elements(y_axis)), event_ratio_2d]
 
   header = strarr(n_elements(x_axis) + 1)
   for i = 0, n_elements(x_axis) - 1 do header[i + 1] = string(x_axis[i])
 
-  ; write_csv, fln_data, data_csv, header = header
+  write_csv, fln_data, data_csv, header = header
 
 end
 
@@ -142,7 +157,7 @@ end
 ; different z range
 ; Inputs: total_counts, event_counts, event_ratio, filepath
 ; ------------------------------------------------------------------------------------------------------------------
-pro make_slice_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, z_axis, z_cuttings, x_range, y_range, xlog, ylog, slice_grid, filename, events_v_log, events_v_range, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_v_log, ratio_v_range, ratio_unit, ps_plot = ps_plot, slice_mlt = slice_mlt, threshold = threshold, region = region, ratio_correction = ratio_correction
+pro make_slice_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, z_axis, z_cuttings, x_range, y_range, xlog, ylog, slice_grid, filename, events_v_log, events_v_range, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_v_log, ratio_v_range, ratio_unit, ps_plot = ps_plot, slice_mlt = slice_mlt, threshold = threshold, region = region, ratio_correction = ratio_correction,remove_ps = remove_ps
   nz = n_elements(z_axis)
 
   slice_grid_str = string(slice_grid, format = '(i2.2)')
@@ -175,37 +190,36 @@ pro make_slice_heat_map, total_counts, event_counts, event_ratio, filepath, ext_
     endif
 
     ; samples
-    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_samples_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1] + '.ps'
+    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_samples_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1]
     title = ext_condition_str + '!C' + int_condition_str + ' SAMPLES' + '!Cat ' + plot_axis[2] + ': [' + slice_block[0] + ',' + slice_block[1] + ']' + '!CFROM ' + ts_date + ' TO ' + te_date
 
-    make_heat_map, x_axis, y_axis, slice_total_counts, filename, title, plot_axis, unit = samples_unit, xrange = x_range, yrange = y_range, zrange = samples_v_range, xlog = xlog, ylog = ylog, zlog = samples_v_log, ps_plot = ps_plot
+    make_heat_map, x_axis, y_axis, slice_total_counts, filename + '.ps', title, plot_axis, unit = samples_unit, xrange = x_range, yrange = y_range, zrange = samples_v_range, xlog = xlog, ylog = ylog, zlog = samples_v_log, ps_plot = ps_plot,remove_ps = remove_ps
+    
+    ; write events counts into a csv file
+    write_map_csv, filename + '.csv' , x_axis, y_axis, slice_total_counts
 
     ; events
-    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_events_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1] + '.ps'
+    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_events_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1]
     title = ext_condition_str + '!C' + int_condition_str + ' EVENTS' + '!Cat ' + plot_axis[2] + ': [' + slice_block[0] + ',' + slice_block[1] + ']' + '!CFROM ' + ts_date + ' TO ' + te_date
 
-    make_heat_map, x_axis, y_axis, slice_event_counts, filename, title, plot_axis, unit = events_unit, xrange = x_range, yrange = y_range, zrange = events_v_range, xlog = xlog, ylog = ylog, zlog = events_v_log, ps_plot = ps_plot
+    make_heat_map, x_axis, y_axis, slice_event_counts, filename + '.ps', title, plot_axis, unit = events_unit, xrange = x_range, yrange = y_range, zrange = events_v_range, xlog = xlog, ylog = ylog, zlog = events_v_log, ps_plot = ps_plot,remove_ps = remove_ps
+
+    ; write events counts into a csv file
+    write_map_csv, filename + '.csv' , x_axis, y_axis, slice_event_counts
 
     ; ratio
-    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1] + '.ps'
+    filename = path_slice + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1] 
     title = ext_condition_str + '!C' + int_condition_str + ' RATIO' + '!Cat ' + plot_axis[2] + ': [' + slice_block[0] + ',' + slice_block[1] + ']' + '!CFROM ' + ts_date + ' TO ' + te_date
 
-    make_heat_map, x_axis, y_axis, slice_event_ratio, filename, title, plot_axis, unit = ratio_unit, xrange = x_range, yrange = y_range, zrange = ratio_v_range, xlog = xlog, ylog = ylog, zlog = ratio_v_log, ps_plot = ps_plot
+    make_heat_map, x_axis, y_axis, slice_event_ratio, filename+ '.ps', title, plot_axis, unit = ratio_unit, xrange = x_range, yrange = y_range, zrange = ratio_v_range, xlog = xlog, ylog = ylog, zlog = ratio_v_log, ps_plot = ps_plot,remove_ps = remove_ps
 
     ; write ratio into a csv file
-    fln_data = path_slice + ext_condition_str + '_' + int_condition_str + '_ratio_' + ts_date + '_to_' + te_date + '_' + plot_axis[0] + '_vs_' + plot_axis[1] + '_at_' + plot_axis[2] + '_' + slice_block[0] + '_' + slice_block[1] + '.csv'
+    write_map_csv, filename + '.csv' , x_axis, y_axis, slice_event_ratio
 
-    data_csv = [reform(y_axis, 1, n_elements(y_axis)), slice_event_ratio]
-
-    header = strarr(n_elements(x_axis) + 1)
-
-    for i = 0, n_elements(x_axis) - 1 do header[i + 1] = string(x_axis[i])
-
-    write_csv, fln_data, data_csv, header = header
   endfor
 end
 
-pro make_events_map, data_pos, flag_para, flag_anti, filepath, ts_date, te_date, plot_axis, ext_condition_str, int_condition_str, range, log, grid, slice_grid, filename, plot_2d, plot_slice, make_table, ps_plot = ps_plot, sample_v_range = sample_v_range, threshold = threshold, total_counts = total_counts, region = region, ratio_correction = ratio_correction, samples_v_range = samples_v_range, RATIO_V_RANGE = RATIO_V_RANGE, energy_range = energy_range
+pro make_events_map, data_pos, flag_para, flag_anti, filepath, ts_date, te_date, plot_axis, ext_condition_str, int_condition_str, range, log, grid, slice_grid, filename, plot_2d, plot_slice, make_table, ps_plot = ps_plot, sample_v_range = sample_v_range, threshold = threshold, region = region, ratio_correction = ratio_correction, samples_v_range = samples_v_range, RATIO_V_RANGE = RATIO_V_RANGE, energy_range = energy_range,remove_ps = remove_ps
 
   x_range = range[*, 0]
   y_range = range[*, 1]
@@ -217,7 +231,7 @@ pro make_events_map, data_pos, flag_para, flag_anti, filepath, ts_date, te_date,
   ; reset grid according to plot_axis
   if plot_axis[0] eq 'MLT' then begin
     grid_x = 0.5 * grid
-    grid_y = 0.5 * grid
+    if abs(y_range[1]-y_range[0]) gt 10 then grid_y = grid else grid_y = 0.5 * grid
   endif else begin
     grid_x = grid
     grid_y = grid
@@ -230,10 +244,10 @@ pro make_events_map, data_pos, flag_para, flag_anti, filepath, ts_date, te_date,
   
   ; Graph settings
   EVENTS_V_LOG = 0
-  EVENTS_V_RANGE = [1, 100.]
+  EVENTS_V_RANGE = [10, 50.]
   events_unit = '# of events'
-  samples_v_log = 1
-  if ~keyword_set(sample_v_range) then samples_v_range = [1, 100.]
+  samples_v_log = 0
+  if ~keyword_set(sample_v_range) then samples_v_range = [10, 50.]
   samples_unit = '# of samples'
   ratio_V_LOG = 0
   if ~keyword_set(RATIO_V_RANGE) then RATIO_V_RANGE = [0, 1.]
@@ -242,10 +256,10 @@ pro make_events_map, data_pos, flag_para, flag_anti, filepath, ts_date, te_date,
   ; if ARRAY_EQUAL(energy_range,[1,40000]) then  RATIO_V_RANGE = [0, 1.] else  RATIO_V_RANGE = [0, 0.6]
 
   ; Draw 2d maps
-  if keyword_set(plot_2d) then make_2d_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, x_range, y_range, xlog, ylog, filename, EVENTS_V_LOG, EVENTS_V_RANGE, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_V_LOG, RATIO_V_RANGE, ratio_unit, ps_plot = ps_plot, threshold = threshold, region = region, ratio_correction = ratio_correction
+  if keyword_set(plot_2d) then make_2d_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, x_range, y_range, xlog, ylog, filename, EVENTS_V_LOG, EVENTS_V_RANGE, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_V_LOG, RATIO_V_RANGE, ratio_unit, ps_plot = ps_plot, threshold = threshold, region = region, ratio_correction = ratio_correction,remove_ps = remove_ps
 
   ; Draw slice maps
-  if keyword_set(plot_slice) then make_slice_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, z_axis, z_cuttings, x_range, y_range, xlog, ylog, slice_grid, filename, EVENTS_V_LOG, EVENTS_V_RANGE, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_V_LOG, RATIO_V_RANGE, ratio_unit, ps_plot = ps_plot, slice_mlt = slice_mlt, threshold = threshold, region = region, ratio_correction = ratio_correction
+  if keyword_set(plot_slice) then make_slice_heat_map, total_counts, event_counts, event_ratio, filepath, ext_condition_str, int_condition_str, ts_date, te_date, plot_axis, x_axis, y_axis, z_axis, z_cuttings, x_range, y_range, xlog, ylog, slice_grid, filename, EVENTS_V_LOG, EVENTS_V_RANGE, events_unit, samples_v_log, samples_v_range, samples_unit, ratio_V_LOG, RATIO_V_RANGE, ratio_unit, ps_plot = ps_plot, slice_mlt = slice_mlt, threshold = threshold, region = region, ratio_correction = ratio_correction,remove_ps = remove_ps
 
   if keyword_set(make_table) then stop
   

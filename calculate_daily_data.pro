@@ -1,5 +1,4 @@
 FUNCTION calculate_daily_data, data
-
   ; Earth_radius = 6371.                                                        ;km
   ; mass_o = 16*1.6e-27*(1e3)^2/(1.6e-19)                                       ; unit: ev/(km/s)^2
   ; mag_normal = 31200.*(6370./(6370+1000))^3*sqrt(1+3*sin(80*3.1415926/180)^2) ; =39832.1 ; dipole field at 1000km and 80 invariant latitude ;33695.9 ;nT at 60 invariant latitude degree from Seki 1998
@@ -43,5 +42,4 @@ FUNCTION calculate_daily_data, data
 ; V_paraE_proton = (proton_Vx*Ex+proton_Vy*Ey+proton_Vz*Ez)/sqrt(Ex^2+Ey^2+Ez^2)
   
   RETURN, data
-
 END

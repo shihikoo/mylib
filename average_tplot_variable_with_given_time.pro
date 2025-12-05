@@ -56,7 +56,7 @@ END
 ; LAST MODIFIED: 03/17/21
 
 
-PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAME = NEW_NAME, sumup = sumup, keep_v = keep_v
+PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAME = NEW_NAME, sumup = sumup, keep_v = keep_v,keep_dv=keep_dv
   
   COMMON get_error, get_err_no, get_err_msg, default_verbose
   
@@ -100,7 +100,10 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
      
      average_data_y, data,'V', average_time, time_avg, y_avg=v_avg, yfound = vfound , sumup = sumup
      if keyword_set(keep_v) then v_avg = data.v
-     
+
+     average_data_y, data, 'DV', average_time, time_avg, y_avg=dv_avg, yfound = dvfound , sumup = sumup
+     if keyword_set(keep_dv) then dv_avg = data.dv
+
      average_data_y, data,'dy', average_time, time_avg,y_avg=dy_avg, yfound = dyfound, sumup = sumup
 
 ;------------------------------------------------------------------
@@ -113,16 +116,15 @@ PRO average_tplot_variable_with_given_time, var, average_time, time_avg, NEW_NAM
         new_var_name = var_names[iv]
      ENDELSE
  
-;     datastr = data
-;     datastr.x = time_avg
-;     datastr.y = y_avg
-;     IF vfound EQ 1 THEN datastr.v = v_avg
-;     IF dyfound EQ 1 THEN datastr.dy = dy_avg
-
-     IF vfound EQ 0 AND dyfound EQ 0 THEN datastr = {x:time_avg, y:y_avg}
-     IF vfound EQ 1 AND dyfound EQ 0 THEN datastr = {x:time_avg, y:y_avg, v:v_avg}
-     IF vfound EQ 0 AND dyfound EQ 1 THEN datastr = {x:time_avg, y:y_avg, dy:dy_avg}
-     IF vfound EQ 1 AND dyfound EQ 1 THEN datastr = {x:time_avg, y:y_avg, v:v_avg, dy:dy_avg}
+   ;   IF vfound EQ 0 AND dyfound EQ 0 THEN datastr = {x:time_avg, y:y_avg}
+   ;   IF vfound EQ 1 AND dyfound EQ 0 THEN datastr = {x:time_avg, y:y_avg, v:v_avg}
+   ;   IF vfound EQ 0 AND dyfound EQ 1 THEN datastr = {x:time_avg, y:y_avg, dy:dy_avg}
+   ;   IF vfound EQ 1 AND dyfound EQ 1 THEN datastr = {x:time_avg, y:y_avg, v:v_avg, dy:dy_avg}
+     
+     datastr = {x:time_avg, y:y_avg}
+     IF KEYWORD_SET(vfound) then datastr=CREATE_STRUCT(datastr, 'v',v_avg )
+     IF KEYWORD_SET(dyfound) then datastr=CREATE_STRUCT(datastr, 'dy',dy_avg )
+     IF KEYWORD_SET(dvfound) then datastr=CREATE_STRUCT(datastr, 'dv',dv_avg )
 
      str_element, data, 'pabins', value, SUCCESS=ebfound
      IF ebfound EQ 1 THEN datastr = {x: time_avg, y:y_avg, v:v_avg, pabins:data.pabins}

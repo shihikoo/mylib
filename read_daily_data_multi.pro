@@ -50,7 +50,7 @@ function read_daily_csv_into_matrix, jd_s, ndays, data_path, avoid_compression_t
     averaged_filename = 'data/hpca_science_mode_modified_averaged_AVG' + at_str
     varname = 'mms1_hpca_science_mode_modified'
     averaged_varname = 'mms1_hpca_science_mode_modified_AVG' + at_str
-
+  
     print, FINDFILE(averaged_filename + '.tplot.gz', count = ct_tplot_gz)
     if ct_tplot_gz then spawn, 'gzip -df ' + averaged_filename + '.tplot.gz'
     print, FINDFILE(averaged_filename + '.tplot', count = ct_tplot)

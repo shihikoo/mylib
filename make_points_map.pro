@@ -20,7 +20,7 @@ pro draw_mlt_points_plot, data_pos, flag_para, flag_anti, filename = filename, t
   PLOT, [0, 0, -100, 100], [-100, 100, 0, 0] $
     , title = title, xtitle = xtitle, ytitle = ytitle, xrange = [-r_range, r_range], yrange = [-r_range, r_range] $
     , xstyle = 5, ystyle = 5, charsize = 1.2, position = [0.15, 0.15, 0.85, 0.85], xlog = xlog, ylog = ylog, xcharsize = 2, ycharsize = 2
-
+  
   if keyword_set(ps_plot) then psym_point_map = 1 else psym_point_map = 3
 
   ; plot data that has no identifid event

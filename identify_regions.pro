@@ -85,7 +85,7 @@ pro identify_regions, h1_density_name, h1_velocity_t_name, x_gse_name, y_gse_nam
     index = where(region eq 1 and x_gse gt -10 and abs(y_gsm) lt 10 and (op + hp) gt 0.02, ct)
     if ct gt 0 then region[index] = 2
   endif
-
+; stop
   ; -- store the region information into tplot string
   str = {x: time_avg, y: region}
   lim = {yrange: [0.1, 120], ylog: 1, psym: 10}
